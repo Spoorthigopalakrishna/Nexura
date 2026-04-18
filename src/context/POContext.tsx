@@ -7,6 +7,8 @@ interface POContextType {
   generatePO: (requisition: Requisition) => PurchaseOrder;
   dispatchPO: (poId: string) => void;
   acknowledgePO: (poId: string) => void;
+  updatePOStatus: (poId: string, status: POStatus) => void;
+  uploadDocument: (poId: string, doc: { name: string; url: string; addedAt: string }) => void;
 }
 
 const POContext = createContext<POContextType | undefined>(undefined);
@@ -91,8 +93,37 @@ export const POProvider: FC<{ children: ReactNode }> = ({ children }) => {
     );
   };
 
+  const updatePOStatus = (poId: string, status: POStatus) => {
+    setPurchaseOrders(prev =>
+      prev.map(po => {
+        if (po.id !== poId) return po;
+        const blockchain = {
+          ...po.blockchain,
+          blockNumber: po.blockchain.blockNumber + 1,
+          timestamp: new Date().toISOString()
+        };
+        return { ...po, status, blockchain };
+      })
+    );
+  };
+
+  const uploadDocument = (poId: string, doc: { name: string; url: string; addedAt: string }) => {
+    setPurchaseOrders(prev =>
+      prev.map(po => {
+        if (po.id !== poId) return po;
+        const docs = po.documents ? [...po.documents, doc] : [doc];
+        const blockchain = {
+          ...po.blockchain,
+          blockNumber: po.blockchain.blockNumber + 1,
+          timestamp: new Date().toISOString()
+        };
+        return { ...po, documents: docs, blockchain };
+      })
+    );
+  };
+
   return (
-    <POContext.Provider value={{ purchaseOrders, generatePO, dispatchPO, acknowledgePO }}>
+    <POContext.Provider value={{ purchaseOrders, generatePO, dispatchPO, acknowledgePO, updatePOStatus, uploadDocument }}>
       {children}
     </POContext.Provider>
   );

@@ -1,4 +1,6 @@
-export * from './LoginPage';
-export * from './Dashboard';
-export * from './CatalogPage';
-export * from './RequisitionPage';
+export { LoginPage } from './LoginPage';
+export { Dashboard } from './Dashboard';
+export { CatalogPage } from './CatalogPage';
+export { RequisitionPage } from './RequisitionPage';
+export { OrdersPage } from './OrdersPage';
+export { VendorPortalPage } from './VendorPortalPage';

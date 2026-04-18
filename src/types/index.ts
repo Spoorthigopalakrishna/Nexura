@@ -18,7 +18,7 @@ export interface User {
 
 export type Priority = 'Low' | 'Normal' | 'High' | 'Critical';
 
-export type POStatus = 'Generated' | 'Blockchain_Recorded' | 'Dispatched' | 'Acknowledged';
+export type POStatus = 'Generated' | 'Blockchain_Recorded' | 'Dispatched' | 'Acknowledged' | 'Order_Confirmed' | 'In_Production' | 'Shipped' | 'Delivered';
 
 export interface BlockchainRecord {
   txHash: string;
@@ -46,4 +46,5 @@ export interface PurchaseOrder {
   blockchain: BlockchainRecord;
   dispatchedAt?: string;
   acknowledgedAt?: string;
+  documents?: { name: string; url: string; addedAt: string }[];
 }

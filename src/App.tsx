@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidebar } from './components';
-import { Dashboard, CatalogPage, RequisitionPage, LoginPage } from './pages';
+import { Dashboard, CatalogPage, RequisitionPage, LoginPage, OrdersPage, VendorPortalPage } from './pages';
 import { Search, Bell, User, CheckCircle } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 
@@ -12,6 +12,13 @@ function App() {
   if (!isAuthenticated) {
     return <LoginPage />;
   }
+
+  // Auto-route vendors
+  useEffect(() => {
+    if (user?.role === 'Vendor' && activeTab === 'dashboard') {
+      setActiveTab('vendor_portal');
+    }
+  }, [user, activeTab]);
 
   const handlePrSubmit = () => {
     setShowSuccess(true);
@@ -80,8 +87,10 @@ function App() {
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'catalog' && <CatalogPage onProceed={() => setActiveTab('requisition')} />}
         {activeTab === 'requisition' && <RequisitionPage onBack={() => setActiveTab('catalog')} onSubmit={handlePrSubmit} />}
+        {activeTab === 'orders' && <OrdersPage />}
+        {activeTab === 'vendor_portal' && <VendorPortalPage />}
         
-        {['rfqs', 'suppliers', 'orders', 'settings'].includes(activeTab) && (
+        {['rfqs', 'suppliers', 'settings'].includes(activeTab) && (
           <div className="animate-fade-in glass-card" style={{ height: '400px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', textAlign: 'center' }}>
             <h2 style={{ fontSize: '24px' }}>{activeTab.toUpperCase()} Module</h2>
             <p style={{ color: 'var(--text-secondary)', maxWidth: '400px' }}>This module is currently being optimized for Nexura. Check back soon.</p>

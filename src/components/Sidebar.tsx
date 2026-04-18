@@ -18,7 +18,7 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const { logout } = useAuth();
 
-  const menuItems = [
+  let menuItems = [
     { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { id: 'catalog', icon: Package, label: 'Catalog' },
     { id: 'rfqs', icon: FileText, label: 'My RFQs' },
@@ -26,6 +26,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
     { id: 'orders', icon: ShoppingCart, label: 'My Orders' },
     { id: 'settings', icon: Settings, label: 'Settings' },
   ];
+
+  if (useAuth().user?.role === 'Vendor') {
+    menuItems = [
+      { id: 'vendor_portal', icon: Package, label: 'Vendor Portal' },
+      { id: 'settings', icon: Settings, label: 'Settings' }
+    ];
+  }
 
   return (
     <div className="glass-card" style={{

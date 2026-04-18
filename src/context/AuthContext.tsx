@@ -17,7 +17,13 @@ export const AuthProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const login = (email: string) => {
     setIsAuthenticated(true);
-    setUser({ email });
+    let role = 'Employee';
+    const prefix = email.split('@')[0].toLowerCase();
+    if (prefix === 'admin') role = 'Admin';
+    if (prefix === 'manager') role = 'Manager';
+    if (prefix === 'finance') role = 'Finance';
+    if (prefix === 'vendor') role = 'Vendor';
+    setUser({ email, role });
   };
 
   const logout = () => {

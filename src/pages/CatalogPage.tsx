@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useCart, type Product } from '../context/CartContext';
+import { useCart } from '../context/CartContext';
+import type { Product } from '../types';
 import { Search, Filter, ShoppingCart, Plus, Check } from 'lucide-react';
 
 const MOCK_PRODUCTS: Product[] = [
