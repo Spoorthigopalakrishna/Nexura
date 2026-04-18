@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, type ReactNode, type FC, useEffect } from 'react';
+import { createContext, useContext, useState, type ReactNode, type FC } from 'react';
 import type { PurchaseOrder, Requisition, BlockchainRecord, POStatus } from '../types';
 
 interface POContextType {

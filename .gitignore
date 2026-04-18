@@ -45,3 +45,7 @@ Thumbs.db
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Internal Docs
+docs/credentials.md
+docs/Working.md
