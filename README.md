@@ -4,19 +4,18 @@
 
 Nexura is an enterprise-grade B2B procurement platform designed to streamline the lifecycle of corporate purchasing. Built with a focus on high-performance aesthetics and developer-first architecture, Nexura provides a seamless interface for discovery, requisition, and vendor management.
 
-## 🚀 Phase 1: Discovery & Requisition
-
-This repository represents the initial implementation (Phase 1) focused on the core procurement workflow for employees and account executives.
+This repository represents the full implementation (Phases 1-5) of the Nexura procurement ecosystem.
 
 ### Key Features
-- **Product Discovery**: High-performance catalogue with sub-second searching and category filtering.
-- **Enterprise Requisition**: Multi-item shopping cart system with localized pricing (INR ₹).
-- **Formal Submission**: Detailed requisition process capturing business justification, priority levels, and document attachments.
+- **Phase 1: Discovery & Requisition**: High-performance catalogue with sub-second searching and category filtering.
+- **Phase 2: Automated Approval Workflow**: Multi-stage approval routing (Manager, Finance, Admin) based on dynamic business rules.
+- **Phase 3: Purchase Order & Blockchain**: Automated PO generation with immutable records written to Nexura Chain (Testnet).
+- **Phase 4: Vendor Fulfillment**: Dedicated Vendor Portal for milestone tracking, order acknowledgment, and compliance document uploads.
+- **Phase 5: Invoicing & Payment**: OCR-simulated 2-way matching, discrepancy flagging, and blockchain-verified payment execution.
 - **Premium UI/UX**:
   - Glassmorphic design system with real-time blur.
-  - Custom industrial-grade product imagery.
-  - Fluid micro-animations powered by Framer Motion.
-  - Fully responsive, mobile-first layouts.
+  - Industrial-grade product imagery and enterprise typography.
+  - Fluid micro-animations and responsive, mobile-first layouts.
 
 ## 🛠 Technology Stack
 - **Framework**: React 19 + Vite 8
@@ -59,9 +58,10 @@ This repository represents the initial implementation (Phase 1) focused on the c
 
 ## 🛣 Roadmap
 - [x] Phase 1: Discovery & Requisition Implementation
-- [ ] Phase 2: RFQ (Request for Quotation) Module
-- [ ] Phase 3: Vendor Portal & Supplier Management
-- [ ] Phase 4: Financial Approval Workflows & ERP Integration
+- [x] Phase 2: Automated Approval Workflows & Routing
+- [x] Phase 3: Purchase Order Generation & Blockchain Immuntability
+- [x] Phase 4: Vendor Fulfillment Portal & Milestone Tracking
+- [x] Phase 5: Invoicing, 2-Way Matching & Payment Settlement
 
 ---
 

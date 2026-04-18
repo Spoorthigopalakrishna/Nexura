@@ -11,7 +11,10 @@ import {
   Package,
   Copy,
   ExternalLink,
-  ShieldCheck
+  ShieldCheck,
+  CreditCard,
+  AlertCircle,
+  CheckSquare
 } from 'lucide-react';
 import type { PurchaseOrder } from '../types';
 
@@ -19,20 +22,38 @@ const statusColors: Record<string, string> = {
   Generated: 'var(--text-secondary)',
   Blockchain_Recorded: 'var(--accent-purple)',
   Dispatched: 'var(--warning)',
-  Acknowledged: 'var(--success)'
+  Acknowledged: 'var(--success)',
+  Order_Confirmed: 'var(--accent-cyan)',
+  In_Production: 'var(--accent-purple)',
+  Shipped: '#f59e0b',
+  Delivered: '#10b981',
+  Invoiced: 'var(--primary)',
+  Under_Review: 'var(--error)',
+  Payment_Pending: 'var(--success)',
+  Paid: 'var(--accent-cyan)',
+  Closed: 'var(--text-secondary)'
 };
 
 const statusIcons: Record<string, React.ReactNode> = {
   Generated: <Clock size={14} />,
   Blockchain_Recorded: <ShieldCheck size={14} />,
   Dispatched: <Send size={14} />,
-  Acknowledged: <CheckCircle size={14} />
+  Acknowledged: <CheckCircle size={14} />,
+  Order_Confirmed: <CheckCircle size={14} />,
+  In_Production: <Clock size={14} />,
+  Shipped: <Package size={14} />,
+  Delivered: <Package size={14} />,
+  Invoiced: <FileText size={14} />,
+  Under_Review: <AlertCircle size={14} />,
+  Payment_Pending: <CheckCircle size={14} />,
+  Paid: <CreditCard size={14} />,
+  Closed: <CheckSquare size={14} />
 };
 
 const truncateHash = (hash: string) => `${hash.slice(0, 10)}...${hash.slice(-6)}`;
 
 export const OrdersPage: React.FC = () => {
-  const { purchaseOrders, generatePO, acknowledgePO } = usePO();
+  const { purchaseOrders, generatePO, acknowledgePO, approveInvoice, executePayment, closePO } = usePO();
   const { onFinalApproval } = useRequisitions();
   const { user } = useAuth();
   const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
@@ -232,6 +253,90 @@ export const OrdersPage: React.FC = () => {
                         ))}
                       </div>
                     </div>
+
+                    {/* Finance & Invoicing Panel */}
+                    {(selected.invoice || ['Paid', 'Closed'].includes(selected.status)) && (
+                      <div style={{ padding: '20px', borderRadius: '16px', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.25)', marginBottom: '20px' }}>
+                        <h3 style={{ fontSize: '15px', fontWeight: 700, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--primary)' }}>
+                          <CreditCard size={16} /> Finance & Invoicing
+                        </h3>
+                        
+                        {selected.invoice && (
+                          <div style={{ marginBottom: '16px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                              <span style={{ fontSize: '13px', fontWeight: 600 }}>Invoice #{selected.invoice.id}</span>
+                              <span style={{ 
+                                fontSize: '11px', 
+                                fontWeight: 700, 
+                                color: selected.invoice.status === 'Flagged' ? 'var(--error)' : 'var(--success)' 
+                              }}>
+                                {selected.invoice.status.toUpperCase()}
+                              </span>
+                            </div>
+                            
+                            {selected.invoice.discrepancies && (
+                              <div style={{ padding: '10px', background: 'rgba(239, 68, 68, 0.1)', borderRadius: '6px', marginBottom: '12px' }}>
+                                <p style={{ fontSize: '11px', color: 'var(--error)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <AlertCircle size={12} /> {selected.invoice.discrepancies[0]}
+                                </p>
+                              </div>
+                            )}
+
+                            {selected.invoice.status === 'Flagged' && (user?.role === 'Finance' || user?.role === 'Admin') && (
+                              <button 
+                                className="btn-primary" 
+                                onClick={() => approveInvoice(selected.id)}
+                                style={{ width: '100%', padding: '10px', justifyContent: 'center', fontSize: '13px' }}
+                              >
+                                Override Discrepancy & Approve
+                              </button>
+                            )}
+
+                            {selected.invoice.status === 'Pending' && (user?.role === 'Finance' || user?.role === 'Admin') && (
+                              <button 
+                                className="btn-primary" 
+                                onClick={() => approveInvoice(selected.id)}
+                                style={{ width: '100%', padding: '10px', justifyContent: 'center', fontSize: '13px' }}
+                              >
+                                Approve for Payment
+                              </button>
+                            )}
+
+                            {selected.status === 'Payment_Pending' && (user?.role === 'Finance' || user?.role === 'Admin') && (
+                              <button 
+                                className="btn-primary" 
+                                onClick={() => executePayment(selected.id)}
+                                style={{ width: '100%', padding: '10px', justifyContent: 'center', fontSize: '13px', background: 'var(--accent-cyan)', borderColor: 'var(--accent-cyan)' }}
+                              >
+                                Execute Blockchain Payment
+                              </button>
+                            )}
+
+                            {selected.status === 'Paid' && (
+                              <div style={{ padding: '10px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--success)', fontSize: '13px' }}>
+                                <CheckCircle size={16} /> Paid on {new Date(selected.paidAt!).toLocaleDateString()}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {selected.status === 'Paid' && (user?.role === 'Admin' || user?.role === 'Manager') && (
+                          <button 
+                            className="btn-primary" 
+                            onClick={() => closePO(selected.id)}
+                            style={{ width: '100%', padding: '10px', justifyContent: 'center', fontSize: '13px', background: 'var(--text-secondary)', borderColor: 'var(--text-secondary)' }}
+                          >
+                            Close Order & Reconcile
+                          </button>
+                        )}
+
+                        {selected.status === 'Closed' && (
+                          <div style={{ padding: '10px', background: 'rgba(148, 163, 184, 0.1)', borderRadius: '6px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                            <CheckSquare size={16} /> Order Closed & Budget Reconciled
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {/* Dispatch Panel */}
                     <div style={{ padding: '20px', borderRadius: '16px', background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.25)', marginBottom: '20px' }}>

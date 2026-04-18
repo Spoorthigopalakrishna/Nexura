@@ -9,7 +9,8 @@ import {
   Clock,
   ShieldCheck,
   Zap,
-  CheckSquare
+  CheckSquare,
+  CreditCard
 } from 'lucide-react';
 import type { PurchaseOrder, POStatus } from '../types';
 
@@ -19,7 +20,12 @@ const statusColors: Record<string, string> = {
   Order_Confirmed: 'var(--accent-cyan)',
   In_Production: 'var(--accent-purple)',
   Shipped: '#f59e0b',
-  Delivered: '#10b981'
+  Delivered: '#10b981',
+  Invoiced: 'var(--primary)',
+  Under_Review: 'var(--error)',
+  Payment_Pending: 'var(--success)',
+  Paid: 'var(--accent-cyan)',
+  Closed: 'var(--text-secondary)'
 };
 
 const statusIcons: Record<string, React.ReactNode> = {
@@ -28,16 +34,21 @@ const statusIcons: Record<string, React.ReactNode> = {
   Order_Confirmed: <CheckCircle size={14} />,
   In_Production: <Zap size={14} />,
   Shipped: <Truck size={14} />,
-  Delivered: <Package size={14} />
+  Delivered: <Package size={14} />,
+  Invoiced: <FileText size={14} />,
+  Under_Review: <Clock size={14} />,
+  Payment_Pending: <CheckCircle size={14} />,
+  Paid: <CreditCard size={14} />,
+  Closed: <CheckSquare size={14} />
 };
 
 export const VendorPortalPage: React.FC = () => {
-  const { purchaseOrders, updatePOStatus, uploadDocument } = usePO();
+  const { purchaseOrders, updatePOStatus, uploadDocument, submitInvoice } = usePO();
   const [selectedPO, setSelectedPO] = useState<PurchaseOrder | null>(null);
 
   // Vendor sees all POs dispatched to their email or all if missing prefix parsing (fallback)
   const vendorOrders = purchaseOrders.filter(
-    po => ['Dispatched', 'Acknowledged', 'Order_Confirmed', 'In_Production', 'Shipped', 'Delivered'].includes(po.status)
+    po => ['Dispatched', 'Acknowledged', 'Order_Confirmed', 'In_Production', 'Shipped', 'Delivered', 'Invoiced', 'Under_Review', 'Payment_Pending', 'Paid', 'Closed'].includes(po.status)
   );
 
   const selected = selectedPO
@@ -207,6 +218,68 @@ export const VendorPortalPage: React.FC = () => {
                         <Package size={16} /> Mark Delivered
                       </button>
                     </div>
+
+                    {selected.status === 'Delivered' && !selected.invoice && (
+                      <div className="glass-card animate-scale-in" style={{ padding: '24px', marginBottom: '32px', border: '1px solid var(--primary)', background: 'rgba(59, 130, 246, 0.05)' }}>
+                        <h3 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <CreditCard size={20} color="var(--primary)" /> Ready for Invoicing
+                        </h3>
+                        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                          Delivery is complete. Submit your professional invoice now to trigger the automated 2-way matching process and schedule payment.
+                        </p>
+                        <button 
+                          className="btn-primary" 
+                          onClick={() => submitInvoice(selected.id)}
+                          style={{ width: '100%', padding: '14px', justifyContent: 'center' }}
+                        >
+                          Generate & Submit E-Invoice
+                        </button>
+                      </div>
+                    )}
+
+                    {selected.invoice && (
+                      <div className="glass-card" style={{ padding: '20px', marginBottom: '32px', border: selected.invoice.status === 'Flagged' ? '1px solid var(--error)' : '1px solid var(--success)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                          <h3 style={{ fontSize: '16px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <FileText size={18} /> Invoice {selected.invoice.id}
+                          </h3>
+                          <span style={{ 
+                            padding: '4px 12px', 
+                            borderRadius: '20px', 
+                            fontSize: '11px', 
+                            fontWeight: 700,
+                            background: selected.invoice.status === 'Flagged' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                            color: selected.invoice.status === 'Flagged' ? 'var(--error)' : 'var(--success)'
+                          }}>
+                            {selected.invoice.status.toUpperCase()}
+                          </span>
+                        </div>
+                        
+                        <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                            <span>OCR Processing:</span>
+                            <span style={{ color: 'var(--success)', fontWeight: 600 }}>Complete (Digitized)</span>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <span>Submission Date:</span>
+                            <span style={{ color: 'white' }}>{new Date(selected.invoice.submittedAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+
+                        {selected.invoice.discrepancies && (
+                          <div style={{ marginTop: '16px', padding: '12px', background: 'rgba(239, 68, 68, 0.05)', borderRadius: '8px', borderLeft: '3px solid var(--error)' }}>
+                            <p style={{ fontSize: '12px', color: 'var(--error)', fontWeight: 600, marginBottom: '4px' }}>Discrepancy Detected (2-Way Match Failed):</p>
+                            <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{selected.invoice.discrepancies[0]}</p>
+                          </div>
+                        )}
+                        
+                        {!selected.invoice.discrepancies && selected.invoice.status === 'Pending' && (
+                          <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--success)', fontSize: '12px' }}>
+                            <CheckSquare size={14} /> 2-Way Match Successful: Items & Prices verified.
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                       <h3 style={{ fontSize: '16px', fontWeight: 700 }}>Attached Documents</h3>

@@ -18,7 +18,10 @@ export interface User {
 
 export type Priority = 'Low' | 'Normal' | 'High' | 'Critical';
 
-export type POStatus = 'Generated' | 'Blockchain_Recorded' | 'Dispatched' | 'Acknowledged' | 'Order_Confirmed' | 'In_Production' | 'Shipped' | 'Delivered';
+export type POStatus = 
+  'Generated' | 'Blockchain_Recorded' | 'Dispatched' | 'Acknowledged' | 
+  'Order_Confirmed' | 'In_Production' | 'Shipped' | 'Delivered' | 
+  'Invoiced' | 'Under_Review' | 'Payment_Pending' | 'Paid' | 'Closed';
 
 export interface BlockchainRecord {
   txHash: string;
@@ -47,4 +50,18 @@ export interface PurchaseOrder {
   dispatchedAt?: string;
   acknowledgedAt?: string;
   documents?: { name: string; url: string; addedAt: string }[];
+  invoice?: Invoice;
+  paidAt?: string;
+  closedAt?: string;
+}
+
+export interface Invoice {
+  id: string;
+  poId: string;
+  items: CartItem[];
+  totalAmount: number;
+  submittedAt: string;
+  status: 'Pending' | 'Flagged' | 'Approved' | 'Paid';
+  discrepancies?: string[];
+  ocrProcessed: boolean;
 }

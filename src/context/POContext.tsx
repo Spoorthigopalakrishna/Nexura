@@ -9,6 +9,10 @@ interface POContextType {
   acknowledgePO: (poId: string) => void;
   updatePOStatus: (poId: string, status: POStatus) => void;
   uploadDocument: (poId: string, doc: { name: string; url: string; addedAt: string }) => void;
+  submitInvoice: (poId: string) => void;
+  approveInvoice: (poId: string) => void;
+  executePayment: (poId: string) => void;
+  closePO: (poId: string) => void;
 }
 
 const POContext = createContext<POContextType | undefined>(undefined);
@@ -122,8 +126,104 @@ export const POProvider: FC<{ children: ReactNode }> = ({ children }) => {
     );
   };
 
+  const submitInvoice = (poId: string) => {
+    setPurchaseOrders(prev =>
+      prev.map(po => {
+        if (po.id !== poId) return po;
+
+        // Simulate OCR & 2-Way Match
+        const discrepancies: string[] = [];
+        // Randomly simulate a discrepancy for demo purposes (1 in 5 chance)
+        if (Math.random() < 0.2) {
+          discrepancies.push('Price Mismatch: Unit price for item 1 differs from PO');
+        }
+
+        const invoice = {
+          id: `INV-${Math.floor(100000 + Math.random() * 900000)}`,
+          poId: po.id,
+          items: po.items,
+          totalAmount: po.totalAmount,
+          submittedAt: new Date().toISOString(),
+          status: discrepancies.length > 0 ? 'Flagged' : 'Pending',
+          discrepancies: discrepancies.length > 0 ? discrepancies : undefined,
+          ocrProcessed: true,
+        };
+
+        const blockchain = {
+          ...po.blockchain,
+          blockNumber: po.blockchain.blockNumber + 1,
+          timestamp: new Date().toISOString()
+        };
+
+        return { 
+          ...po, 
+          status: invoice.status === 'Flagged' ? 'Under_Review' : 'Invoiced', 
+          invoice: invoice as any, 
+          blockchain 
+        };
+      })
+    );
+  };
+
+  const approveInvoice = (poId: string) => {
+    setPurchaseOrders(prev =>
+      prev.map(po => {
+        if (po.id !== poId || !po.invoice) return po;
+        const blockchain = {
+          ...po.blockchain,
+          blockNumber: po.blockchain.blockNumber + 1,
+          timestamp: new Date().toISOString()
+        };
+        return { 
+          ...po, 
+          status: 'Payment_Pending', 
+          invoice: { ...po.invoice, status: 'Approved' }, 
+          blockchain 
+        };
+      })
+    );
+  };
+
+  const executePayment = (poId: string) => {
+    setPurchaseOrders(prev =>
+      prev.map(po => {
+        if (po.id !== poId || !po.invoice) return po;
+        const blockchain = {
+          ...po.blockchain,
+          blockNumber: po.blockchain.blockNumber + 1,
+          timestamp: new Date().toISOString()
+        };
+        return { 
+          ...po, 
+          status: 'Paid', 
+          paidAt: new Date().toISOString(),
+          invoice: { ...po.invoice, status: 'Paid' }, 
+          blockchain 
+        };
+      })
+    );
+  };
+
+  const closePO = (poId: string) => {
+    setPurchaseOrders(prev =>
+      prev.map(po => {
+        if (po.id !== poId) return po;
+        const blockchain = {
+          ...po.blockchain,
+          blockNumber: po.blockchain.blockNumber + 1,
+          timestamp: new Date().toISOString()
+        };
+        return { ...po, status: 'Closed', closedAt: new Date().toISOString(), blockchain };
+      })
+    );
+  };
+
   return (
-    <POContext.Provider value={{ purchaseOrders, generatePO, dispatchPO, acknowledgePO, updatePOStatus, uploadDocument }}>
+    <POContext.Provider value={{ 
+      purchaseOrders, generatePO, dispatchPO, acknowledgePO, 
+      updatePOStatus, uploadDocument, submitInvoice, 
+      approveInvoice, executePayment, closePO 
+    }}>
       {children}
     </POContext.Provider>
   );
