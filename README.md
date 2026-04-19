@@ -65,4 +65,3 @@ This repository represents the full implementation (Phases 1-5) of the Nexura pr
 
 ---
 
-Built with precision by **Antigravity** for **Sanskriti Labs**.
