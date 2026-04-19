@@ -9,16 +9,16 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showSuccess, setShowSuccess] = useState(false);
 
+  // Auto-route vendors
+  useEffect(() => {
+    if (isAuthenticated && user?.role === 'Vendor' && activeTab === 'dashboard') {
+      setActiveTab('vendor_portal');
+    }
+  }, [isAuthenticated, user, activeTab]);
+
   if (!isAuthenticated) {
     return <LoginPage />;
   }
-
-  // Auto-route vendors
-  useEffect(() => {
-    if (user?.role === 'Vendor' && activeTab === 'dashboard') {
-      setActiveTab('vendor_portal');
-    }
-  }, [user, activeTab]);
 
   const handlePrSubmit = () => {
     setShowSuccess(true);
